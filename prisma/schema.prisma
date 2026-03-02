@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  date        String   // ISO date string YYYY-MM-DD
+  startTime   String   // HH:mm
+  endTime     String   // HH:mm
+  duration    Int      // minutes
+  category    String   @default("general")
+  priority    Int      @default(2) // 1, 2, or 3
+  completed   Boolean  @default(false)
+  focusScore  Int?
+  notes       String?
+  recurring   String?  // none, daily, weekly, monthly
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date])
+  @@index([category])
+  @@index([completed])
+}
+
+model Goal {
+  id        String   @id @default(uuid())
+  type      String   // daily, monthly, yearly
+  period    String   // YYYY-MM-DD for daily, YYYY-MM for monthly, YYYY for yearly
+  data      Json     // Flexible JSON for goal targets
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, period])
+  @@index([type])
+}
+
+model Settings {
+  id              String   @id @default("default")
+  theme           String   @default("dark")
+  accentColor     String   @default("#6366f1")
+  weekStart       String   @default("monday")
+  streakThreshold Int      @default(70)
+  dailyResetTime  String   @default("00:00")
+  privacyMode     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AnalyticsSnapshot {
+  id              String   @id @default(uuid())
+  date            String   // ISO date YYYY-MM-DD
+  totalMinutes    Int      @default(0)
+  completedTasks  Int      @default(0)
+  totalTasks      Int      @default(0)
+  completionRate  Float    @default(0)
+  averageFocus    Float    @default(0)
+  createdAt       DateTime @default(now())
+
+  @@unique([date])
+  @@index([date])
+}
